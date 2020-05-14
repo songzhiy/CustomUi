@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <declare-styleable name="CustomTextView">
+        <attr name="customText1" format="string" />
+        <attr name="customText2" format="string" />
+        <attr name="customText3" format="string" />
+        <attr name="customText4" format="string" />
+        <attr name="customText5" format="string" />
+    </declare-styleable>
+
+    <attr name="customStyleInTheme" format="reference" />
+
+    <!--    将会在xml中使用的style-->
+    <style name="CustomViewInXml">
+        <item name="customText1">custom text in xml text 1</item>
+        <item name="customText2">custom text in xml text 2</item>
+    </style>
+
+    <!--    def style attr-->
+    <style name="CustomViewInDefStyleAttr">
+        <item name="customText1">custom text in def style attr text 1</item>
+        <item name="customText2">custom text in def style attr text 2</item>
+        <item name="customText3">custom text in def style attr text 3</item>
+    </style>
+
+    <!--    def style res-->
+    <style name="CustomViewInDefStyleRes">
+        <item name="customText1">custom text in def style res text 1</item>
+        <item name="customText2">custom text in def style res text 2</item>
+        <item name="customText3">custom text in def style res text 3</item>
+        <item name="customText4">custom text in def style res text 4</item>
+    </style>
+
+    <!--    将要放在main activity theme中的style-->
+    <style name="CustomViewInTheme" parent="Theme.AppCompat.Light">
+        <item name="customText1">custom text in theme text 1</item>
+        <item name="customText2">custom text in theme text 2</item>
+        <item name="customText3">custom text in theme text 3</item>
+        <item name="customText4">custom text in theme text 4</item>
+        <item name="customText5">custom text in theme text 5</item>
+
+        <!--        <item name="customStyleInTheme">@style/CustomViewInDefStyleAttr</item>-->
+    </style>
+
+
+</resources>
