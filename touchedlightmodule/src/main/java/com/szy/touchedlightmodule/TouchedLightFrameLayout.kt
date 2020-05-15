@@ -9,6 +9,8 @@ import androidx.annotation.RequiresApi
 /**
  * Created by songzhiyang on 2020-05-12.
  * @author songzhiyang
+ *
+ * 底层托底view 用来进行touch事件的处理与计算
  */
 @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
 class TouchedLightFrameLayout(

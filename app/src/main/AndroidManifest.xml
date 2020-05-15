@@ -18,6 +18,8 @@
         </activity>
 
         <activity android:name=".customview.CustomViewActivity" />
+
+        <activity android:name=".lightview.LightCustomViewActivity" />
     </application>
 
 </manifest>
