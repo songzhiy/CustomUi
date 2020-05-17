@@ -15,6 +15,11 @@
             android:layout_height="wrap_content"
             android:text="啦啦啦" />
 
+        <com.szy.touchedlightmodule.LightCustomView
+            android:layout_width="100dp"
+            android:layout_height="100dp"
+            android:background="#1f000000" />
+
     </LinearLayout>
 
 
