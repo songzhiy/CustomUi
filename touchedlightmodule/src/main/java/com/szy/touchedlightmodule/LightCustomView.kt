@@ -15,7 +15,7 @@ import kotlin.math.sin
  */
 class LightCustomView : View {
 
-    private var ratio = 0.5f
+    private var ratio = 0.5f//当前的比例
     private val circleRadius = 100.0f
 
     constructor(context: Context) : this(context, null)
@@ -94,18 +94,22 @@ class LightCustomView : View {
     }
 
     private fun getPointA(ratio: Float, thisViewRectangle: Rect): Point {
-        //todo 两个点的位置应该与ratio相关
-        //pointA 应该从 -45度 -> 45度
-        val pointAX = thisViewRectangle.centerX() + cos(Math.PI / 4) * circleRadius
-        val pointAY = thisViewRectangle.centerY() - sin(-Math.PI / 4) * circleRadius
+        //pointA 应该从 -45度 -> 45度 横跨90度 即月亮的上角 始终在 一、四象限
+        val originAngle = -Math.PI / 4
+        val transferAngle = Math.PI / 2 * ratio
+        val endAngle = originAngle + transferAngle
+        val pointAX = thisViewRectangle.centerX() + cos(endAngle) * circleRadius
+        val pointAY = thisViewRectangle.centerY() - sin(endAngle) * circleRadius
         return Point(pointAX, pointAY)
     }
 
     private fun getPointB(ratio: Float, thisViewRectangle: Rect): Point {
-        //todo 两个点的位置应该与ratio相关
-        //pointB 应该从 -45度 -> -135度
-        val pointBX = thisViewRectangle.centerX() + cos(Math.PI / 4) * circleRadius
-        val pointBY = thisViewRectangle.centerY() - sin(Math.PI / 4) * circleRadius
+        //pointB 应该从 -45度 -> -135度 横跨了270度 即月亮的下角 可以经历 一、二、三、四象限
+        val startAngle = -Math.PI / 4
+        val transferAngle = Math.PI * 1.5 * ratio
+        val endAngle = startAngle + transferAngle
+        val pointBX = thisViewRectangle.centerX() + cos(endAngle) * circleRadius
+        val pointBY = thisViewRectangle.centerY() - sin(endAngle) * circleRadius
         return Point(pointBX, pointBY)
     }
 
