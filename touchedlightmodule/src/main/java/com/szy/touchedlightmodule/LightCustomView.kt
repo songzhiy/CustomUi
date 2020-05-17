@@ -9,14 +9,20 @@ import androidx.annotation.RequiresApi
 import kotlin.math.cos
 import kotlin.math.sin
 
+fun getTwoPointDistance(pointA: LightCustomView.Point, pointB: LightCustomView.Point): Double =
+    Math.sqrt(Math.pow((pointA.x - pointB.x), 2.0) + Math.pow((pointA.y - pointB.y), 2.0))
+
 /**
  * Created by songzhiyang on 2020-05-15.
  * @author songzhiyang
  */
 class LightCustomView : View {
 
-    private var ratio = 0.5f//当前的比例
+    private var ratio = 1f//当前的比例
     private val circleRadius = 100.0f
+
+    private var pointA: Point = LightCustomView.Point(0.0, 0.0)
+    private var pointB: Point = LightCustomView.Point(0.0, 0.0)
 
     constructor(context: Context) : this(context, null)
 
@@ -63,7 +69,7 @@ class LightCustomView : View {
     ) {
         //todo 这里应该先通过k求出 两点中垂线上的点 这里先假设是0，0点
         paint.setXfermode(PorterDuffXfermode(PorterDuff.Mode.DST_OUT))
-        val pointC = getPointC(pairPoint, k)
+        val pointC = getPointC(k)
         //这时有了三个点，然后开始画向心弧线
         val path = Path()
         path.moveTo(pairPoint.second.x.toFloat(), pairPoint.second.y.toFloat())
@@ -72,24 +78,49 @@ class LightCustomView : View {
             pointC.x.toFloat(), pointC.y.toFloat(),
             pairPoint.first.x.toFloat(), pairPoint.first.y.toFloat()
         )
-        val rect = RectF()
-        rect.left = (pointC.x - circleRadius).toFloat()
-        rect.top = (pointC.y - circleRadius).toFloat()
-        rect.right = (pointC.x + circleRadius).toFloat()
-        rect.bottom = (pointC.y + circleRadius).toFloat()
-        path.addArc(rect, -45f, 90f)
+//        val rect = RectF()
+//        rect.left = (pointC.x - circleRadius).toFloat()
+//        rect.top = (pointC.y - circleRadius).toFloat()
+//        rect.right = (pointC.x + circleRadius).toFloat()
+//        rect.bottom = (pointC.y + circleRadius).toFloat()
+//        path.addArc(rect, -45f, 90f)
         canvas?.drawPath(path, paint)
     }
 
-    private fun getPointC(pairPoint: Pair<Point, Point>, k: Float): Point {
-        val rect = Rect()
-        this.getDrawingRect(rect)
-        return Point(rect.centerX().toDouble(), rect.centerY().toDouble())
+    private fun getPointC(k: Float): Point {
+        //这里计算c点的办法有些绕 主要根据以下几点：
+        //1、ab与oc垂直，那么ab的斜率 * oc的斜率 = -1
+        //2、c点的横坐标 = o点横坐标 - cosa * oc
+        //3、c点的纵坐标 = o点纵坐标 + sina * oc
+        //4、oc = k * ab
+        //5、sina平方 + cosa平方 = 1
+        //目标 计算出cosa即可
+        //通过上面的基础，我们可以推导出 cona = 1/Math.sqr(1+tana平方) tana = -1/ab斜率
+
+        //先计算下ab斜率
+        //这里进行了一次修正 因为android的坐标系 y是与普通坐标系相反 向下为正 且越来越大
+        val kab = -((pointA.y - pointB.y) / (pointA.x - pointB.x))
+        //获得oc的斜率
+        val koc = -1 / kab
+        //计算出ab中心点o的坐标
+        val pointOx = pointB.x + (pointA.x - pointB.x) / 2
+        val pointOy = pointA.y - (pointA.y - pointB.y) / 2
+        //计算cosa 基于 cos平方 + sin平方 = 1；tana = koc 可推导出下面的公式
+        var cosa = 1 / (Math.sqrt(1 + Math.pow(koc, 2.0)))
+        //这里处理的原因是：
+        //当角度a大于90度时，x坐标实际上应为 pointOx - cos(Pi - a) * k * ab = pointOx + cosa * k * ab
+        if (koc > 0) cosa = cosa else cosa = -cosa
+        val sina = koc * cosa
+        //根据o点坐标 计算c点坐标
+        val pointCx = pointOx - k * getTwoPointDistance(pointA, pointB) * cosa
+        val pointCy = pointOy + k * getTwoPointDistance(pointA, pointB) * sina
+
+        return Point(pointCx, pointCy)
     }
 
     private fun findTwoPoint(ratio: Float, thisViewRectangle: Rect): Pair<Point, Point> {
-        val pointA = getPointA(ratio, thisViewRectangle)
-        val pointB = getPointB(ratio, thisViewRectangle)
+        pointA = getPointA(ratio, thisViewRectangle)
+        pointB = getPointB(ratio, thisViewRectangle)
         return Pair(pointA, pointB)
     }
 
