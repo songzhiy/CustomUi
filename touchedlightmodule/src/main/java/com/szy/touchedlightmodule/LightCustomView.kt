@@ -18,7 +18,7 @@ fun getTwoPointDistance(pointA: LightCustomView.Point, pointB: LightCustomView.P
  */
 class LightCustomView : View {
 
-    private var ratio = 1f//当前的比例
+    private var ratio = 0.8f//当前的比例
     private val circleRadius = 100.0f
 
     private var pointA: Point = LightCustomView.Point(0.0, 0.0)
@@ -49,6 +49,7 @@ class LightCustomView : View {
 
     override fun onDraw(canvas: Canvas?) {
         val paint = Paint()
+        paint.isAntiAlias = true
         val thisViewRectangle = Rect()
         this.getDrawingRect(thisViewRectangle)
         //1、画圆
@@ -56,7 +57,7 @@ class LightCustomView : View {
         //2、寻找到两个圆上的点
         val pairPoint = findTwoPoint(ratio, thisViewRectangle)
         //3、画两个点的向心贝塞尔曲线 这个0.43是 oc = k * ab，其中 o为a,b中点，oc为ab垂线
-        drawInnerArc(pairPoint, 0.43f, canvas, paint)
+        drawInnerArc(pairPoint, 0.43f, canvas, paint, thisViewRectangle)
         //4、画两个点的离心弧线
         //5、将圆与向心贝塞尔曲线、离心弧的区域进行裁剪，剩余的便是月亮
     }
@@ -65,9 +66,9 @@ class LightCustomView : View {
         pairPoint: Pair<Point, Point>,
         k: Float,
         canvas: Canvas?,
-        paint: Paint
+        paint: Paint,
+        thisViewRectangle: Rect
     ) {
-        //todo 这里应该先通过k求出 两点中垂线上的点 这里先假设是0，0点
         paint.setXfermode(PorterDuffXfermode(PorterDuff.Mode.DST_OUT))
         val pointC = getPointC(k)
         //这时有了三个点，然后开始画向心弧线
@@ -78,14 +79,58 @@ class LightCustomView : View {
             pointC.x.toFloat(), pointC.y.toFloat(),
             pairPoint.first.x.toFloat(), pairPoint.first.y.toFloat()
         )
-//        val rect = RectF()
-//        rect.left = (pointC.x - circleRadius).toFloat()
-//        rect.top = (pointC.y - circleRadius).toFloat()
-//        rect.right = (pointC.x + circleRadius).toFloat()
-//        rect.bottom = (pointC.y + circleRadius).toFloat()
-//        path.addArc(rect, -45f, 90f)
+        val rect = RectF()
+        rect.left = (thisViewRectangle.centerX() - circleRadius).toFloat()
+        rect.top = (thisViewRectangle.centerY() - circleRadius).toFloat()
+        rect.right = (thisViewRectangle.centerX() + circleRadius).toFloat()
+        rect.bottom = (thisViewRectangle.centerY() + circleRadius).toFloat()
+        //计算弧度的开始角度
+        var startAngleArc: Double =
+            Math.asin(Math.abs(pairPoint.first.y - thisViewRectangle.centerY()) / circleRadius)
+        var startAngle = getAngleFromArc(startAngleArc)
+        if (pairPoint.first.y > thisViewRectangle.centerY()) {
+            //如果当前月亮上顶点 比 中心点高
+        } else {
+            //如果当前月亮上顶点 比 中心点低
+            startAngle = -startAngle
+        }
+        //计算弧度的扫描过的角度
+        val swipeAngle = getEndPointAngle(pairPoint, thisViewRectangle) - startAngle
+        path.addArc(rect, startAngle.toFloat(), swipeAngle.toFloat())
         canvas?.drawPath(path, paint)
     }
+
+    private fun getEndPointAngle(
+        pairPoint: Pair<Point, Point>,
+        thisViewRectangle: Rect
+    ): Double {
+        var endAngleFrom0Arc: Double//从0度作为参考线 到月亮下顶点的弧度
+        var endAngleFrom0: Double//从0度作为参考线 到月亮下顶点的角度
+        if (pairPoint.second.x > thisViewRectangle.centerX() && pairPoint.second.y < thisViewRectangle.centerY()) {
+            //在第四象限 原点为圆形中心
+            endAngleFrom0Arc =
+                -Math.asin(Math.abs(pairPoint.second.y - thisViewRectangle.centerY()) / circleRadius)
+            endAngleFrom0 = getAngleFromArc(endAngleFrom0Arc)
+        } else if (pairPoint.second.x > thisViewRectangle.centerX() && pairPoint.second.y > thisViewRectangle.centerY()) {
+            //在第一象限 原点为圆形中心
+            endAngleFrom0Arc =
+                Math.asin((pairPoint.second.y - thisViewRectangle.centerY()) / circleRadius)
+            endAngleFrom0 = getAngleFromArc(endAngleFrom0Arc)
+        } else if (pairPoint.second.x < thisViewRectangle.centerX() && pairPoint.second.y > thisViewRectangle.centerY()) {
+            //在第二象限 原点为圆形中心
+            endAngleFrom0Arc =
+                Math.asin((pairPoint.second.y - thisViewRectangle.centerY()) / circleRadius)
+            endAngleFrom0 = 180 - getAngleFromArc(endAngleFrom0Arc)
+        } else {
+            //在第三象限 原点为圆形中心
+            endAngleFrom0Arc =
+                Math.asin(Math.abs(pairPoint.second.y - thisViewRectangle.centerY()) / circleRadius)
+            endAngleFrom0 = 180 + getAngleFromArc(endAngleFrom0Arc)
+        }
+        return endAngleFrom0
+    }
+
+    private fun getAngleFromArc(arc: Double): Double = arc * 180 / Math.PI
 
     private fun getPointC(k: Float): Point {
         //这里计算c点的办法有些绕 主要根据以下几点：
