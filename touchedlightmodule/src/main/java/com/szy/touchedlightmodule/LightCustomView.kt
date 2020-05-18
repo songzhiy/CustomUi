@@ -57,9 +57,9 @@ class LightCustomView : View {
         //2、寻找到两个圆上的点
         val pairPoint = findTwoPoint(ratio, thisViewRectangle)
         //3、画两个点的向心贝塞尔曲线 这个0.43是 oc = k * ab，其中 o为a,b中点，oc为ab垂线
-        drawInnerArc(pairPoint, 0.43f, canvas, paint, thisViewRectangle)
         //4、画两个点的离心弧线
         //5、将圆与向心贝塞尔曲线、离心弧的区域进行裁剪，剩余的便是月亮
+        drawInnerArc(pairPoint, 0.43f, canvas, paint, thisViewRectangle)
     }
 
     private fun drawInnerArc(
