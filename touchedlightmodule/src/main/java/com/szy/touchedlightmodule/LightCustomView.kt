@@ -18,7 +18,7 @@ fun getTwoPointDistance(pointA: LightCustomView.Point, pointB: LightCustomView.P
  */
 class LightCustomView : View {
 
-    private var ratio = 0.8f//当前的比例
+    private var ratio = 0.75f//当前的比例
     private val circleRadius = 100.0f
 
     private var pointA: Point = LightCustomView.Point(0.0, 0.0)
@@ -69,7 +69,9 @@ class LightCustomView : View {
         paint: Paint,
         thisViewRectangle: Rect
     ) {
-        paint.setXfermode(PorterDuffXfermode(PorterDuff.Mode.DST_OUT))
+        paint.color = Color.GREEN
+        paint.style = Paint.Style.STROKE
+//        paint.setXfermode(PorterDuffXfermode(PorterDuff.Mode.DST_OUT))
         val pointC = getPointC(k)
         //这时有了三个点，然后开始画向心弧线
         val path = Path()
@@ -89,13 +91,14 @@ class LightCustomView : View {
             Math.asin(Math.abs(pairPoint.first.y - thisViewRectangle.centerY()) / circleRadius)
         var startAngle = getAngleFromArc(startAngleArc)
         if (pairPoint.first.y > thisViewRectangle.centerY()) {
-            //如果当前月亮上顶点 比 中心点高
+            //如果当前月亮上顶点 比 中心点高 正角度
         } else {
-            //如果当前月亮上顶点 比 中心点低
+            //如果当前月亮上顶点 比 中心点低 负角度
             startAngle = -startAngle
         }
         //计算弧度的扫描过的角度
         val swipeAngle = getEndPointAngle(pairPoint, thisViewRectangle) - startAngle
+        //这里注意一下 起始角度是以x粥正向为0度，顺时针为正，扫描角度同样是按照顺时针方向进行
         path.addArc(rect, startAngle.toFloat(), swipeAngle.toFloat())
         canvas?.drawPath(path, paint)
     }
@@ -106,26 +109,26 @@ class LightCustomView : View {
     ): Double {
         var endAngleFrom0Arc: Double//从0度作为参考线 到月亮下顶点的弧度
         var endAngleFrom0: Double//从0度作为参考线 到月亮下顶点的角度
-        if (pairPoint.second.x > thisViewRectangle.centerX() && pairPoint.second.y < thisViewRectangle.centerY()) {
+        if (pairPoint.second.x > thisViewRectangle.centerX() && pairPoint.second.y > thisViewRectangle.centerY()) {
             //在第四象限 原点为圆形中心
             endAngleFrom0Arc =
-                -Math.asin(Math.abs(pairPoint.second.y - thisViewRectangle.centerY()) / circleRadius)
+                -Math.asin(pairPoint.second.y - thisViewRectangle.centerY() / circleRadius)
             endAngleFrom0 = getAngleFromArc(endAngleFrom0Arc)
-        } else if (pairPoint.second.x > thisViewRectangle.centerX() && pairPoint.second.y > thisViewRectangle.centerY()) {
+        } else if (pairPoint.second.x > thisViewRectangle.centerX() && pairPoint.second.y < thisViewRectangle.centerY()) {
             //在第一象限 原点为圆形中心
             endAngleFrom0Arc =
-                Math.asin((pairPoint.second.y - thisViewRectangle.centerY()) / circleRadius)
-            endAngleFrom0 = getAngleFromArc(endAngleFrom0Arc)
-        } else if (pairPoint.second.x < thisViewRectangle.centerX() && pairPoint.second.y > thisViewRectangle.centerY()) {
+                Math.asin(Math.abs(pairPoint.second.y - thisViewRectangle.centerY()) / circleRadius)
+            endAngleFrom0 = -getAngleFromArc(endAngleFrom0Arc)
+        } else if (pairPoint.second.x < thisViewRectangle.centerX() && pairPoint.second.y < thisViewRectangle.centerY()) {
             //在第二象限 原点为圆形中心
             endAngleFrom0Arc =
-                Math.asin((pairPoint.second.y - thisViewRectangle.centerY()) / circleRadius)
-            endAngleFrom0 = 180 - getAngleFromArc(endAngleFrom0Arc)
+                Math.asin(Math.abs(pairPoint.second.y - thisViewRectangle.centerY()) / circleRadius)
+            endAngleFrom0 = -(180 - getAngleFromArc(endAngleFrom0Arc))
         } else {
             //在第三象限 原点为圆形中心
             endAngleFrom0Arc =
                 Math.asin(Math.abs(pairPoint.second.y - thisViewRectangle.centerY()) / circleRadius)
-            endAngleFrom0 = 180 + getAngleFromArc(endAngleFrom0Arc)
+            endAngleFrom0 = -(180 + getAngleFromArc(endAngleFrom0Arc))
         }
         return endAngleFrom0
     }
