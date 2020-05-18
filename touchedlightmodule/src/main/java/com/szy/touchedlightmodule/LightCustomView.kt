@@ -18,7 +18,7 @@ fun getTwoPointDistance(pointA: LightCustomView.Point, pointB: LightCustomView.P
  */
 class LightCustomView : View {
 
-    private var ratio = 0.75f//当前的比例
+    private var ratio = 0.5f//当前的比例
     private val circleRadius = 100.0f
 
     private var pointA: Point = LightCustomView.Point(0.0, 0.0)
@@ -109,12 +109,12 @@ class LightCustomView : View {
     ): Double {
         var endAngleFrom0Arc: Double//从0度作为参考线 到月亮下顶点的弧度
         var endAngleFrom0: Double//从0度作为参考线 到月亮下顶点的角度
-        if (pairPoint.second.x > thisViewRectangle.centerX() && pairPoint.second.y > thisViewRectangle.centerY()) {
+        if (pairPoint.second.x >= thisViewRectangle.centerX() && pairPoint.second.y >= thisViewRectangle.centerY()) {
             //在第四象限 原点为圆形中心
             endAngleFrom0Arc =
                 -Math.asin(pairPoint.second.y - thisViewRectangle.centerY() / circleRadius)
             endAngleFrom0 = getAngleFromArc(endAngleFrom0Arc)
-        } else if (pairPoint.second.x > thisViewRectangle.centerX() && pairPoint.second.y < thisViewRectangle.centerY()) {
+        } else if (pairPoint.second.x >= thisViewRectangle.centerX() && pairPoint.second.y <= thisViewRectangle.centerY()) {
             //在第一象限 原点为圆形中心
             endAngleFrom0Arc =
                 Math.asin(Math.abs(pairPoint.second.y - thisViewRectangle.centerY()) / circleRadius)
