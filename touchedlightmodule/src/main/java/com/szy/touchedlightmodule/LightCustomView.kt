@@ -18,7 +18,7 @@ fun getTwoPointDistance(pointA: LightCustomView.Point, pointB: LightCustomView.P
  */
 class LightCustomView : View {
 
-    private var ratio = 0.4f//当前的比例
+    private var ratio = 1f//当前的比例
     private val circleRadius = 100.0f
 
     private val paint = Paint()
@@ -64,16 +64,17 @@ class LightCustomView : View {
             Canvas.ALL_SAVE_FLAG
         )
         //1、画圆
-        paint.color = Color.BLUE
+        paint.color = Color.WHITE
+        paint.style = Paint.Style.FILL
         drawCircle(canvas, thisViewRectangle, paint)
         //2、寻找到两个圆上的点
         val pairPoint = findTwoPoint(ratio, thisViewRectangle)
         //3、画两个点的向心贝塞尔曲线 这个0.43是 oc = k * ab，其中 o为a,b中点，oc为ab垂线
         //4、画两个点的离心弧线
         //5、将圆与向心贝塞尔曲线、离心弧的区域进行裁剪，剩余的便是月亮
-        paint.color = Color.GREEN
+        paint.color = Color.TRANSPARENT
 //        paint.setXfermode(PorterDuffXfermode(PorterDuff.Mode.CLEAR))//正常
-        paint.setXfermode(PorterDuffXfermode(PorterDuff.Mode.SRC))
+        paint.setXfermode(PorterDuffXfermode(PorterDuff.Mode.SRC_OUT))
         drawInnerArc(pairPoint, 0.43f, canvas, paint, thisViewRectangle)
         paint.setXfermode(null)
         canvas?.restoreToCount(count!!)
@@ -114,6 +115,8 @@ class LightCustomView : View {
         val swipeAngle = getEndPointAngle(pairPoint, thisViewRectangle) - startAngle
         //这里注意一下 起始角度是以x粥正向为0度，顺时针为正，扫描角度同样是按照顺时针方向进行
         path.addArc(rect, startAngle.toFloat(), swipeAngle.toFloat())
+        //这里注意一下 path当画贝塞尔曲线和弧线时 会存在留白区域，需要进行一次裁剪
+        canvas?.clipPath(path)
         canvas?.drawPath(path, paint)
     }
 
