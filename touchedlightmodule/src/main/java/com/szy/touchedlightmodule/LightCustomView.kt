@@ -18,8 +18,10 @@ fun getTwoPointDistance(pointA: LightCustomView.Point, pointB: LightCustomView.P
  */
 class LightCustomView : View {
 
-    private var ratio = 0.5f//当前的比例
+    private var ratio = 0.4f//当前的比例
     private val circleRadius = 100.0f
+
+    private val paint = Paint()
 
     private var pointA: Point = LightCustomView.Point(0.0, 0.0)
     private var pointB: Point = LightCustomView.Point(0.0, 0.0)
@@ -48,18 +50,33 @@ class LightCustomView : View {
     )
 
     override fun onDraw(canvas: Canvas?) {
-        val paint = Paint()
+        paint.reset()
         paint.isAntiAlias = true
         val thisViewRectangle = Rect()
         this.getDrawingRect(thisViewRectangle)
+        //在进行像素重叠混合时，需要先保存一下图层，否则会出现透明区域变为黑色的问题
+        val count = canvas?.saveLayer(
+            thisViewRectangle.centerX() - circleRadius,
+            thisViewRectangle.centerY() - circleRadius,
+            thisViewRectangle.centerX() + circleRadius,
+            thisViewRectangle.centerY() + circleRadius,
+            null,
+            Canvas.ALL_SAVE_FLAG
+        )
         //1、画圆
+        paint.color = Color.BLUE
         drawCircle(canvas, thisViewRectangle, paint)
         //2、寻找到两个圆上的点
         val pairPoint = findTwoPoint(ratio, thisViewRectangle)
         //3、画两个点的向心贝塞尔曲线 这个0.43是 oc = k * ab，其中 o为a,b中点，oc为ab垂线
         //4、画两个点的离心弧线
         //5、将圆与向心贝塞尔曲线、离心弧的区域进行裁剪，剩余的便是月亮
+        paint.color = Color.GREEN
+//        paint.setXfermode(PorterDuffXfermode(PorterDuff.Mode.CLEAR))//正常
+        paint.setXfermode(PorterDuffXfermode(PorterDuff.Mode.SRC))
         drawInnerArc(pairPoint, 0.43f, canvas, paint, thisViewRectangle)
+        paint.setXfermode(null)
+        canvas?.restoreToCount(count!!)
     }
 
     private fun drawInnerArc(
@@ -69,9 +86,6 @@ class LightCustomView : View {
         paint: Paint,
         thisViewRectangle: Rect
     ) {
-        paint.color = Color.GREEN
-        paint.style = Paint.Style.STROKE
-//        paint.setXfermode(PorterDuffXfermode(PorterDuff.Mode.DST_OUT))
         val pointC = getPointC(k)
         //这时有了三个点，然后开始画向心弧线
         val path = Path()
@@ -197,7 +211,6 @@ class LightCustomView : View {
         thisViewRectangle: Rect,
         paint: Paint
     ) {
-        paint.color = Color.WHITE
         val centerX = thisViewRectangle.centerX()
         val centerY = thisViewRectangle.centerY()
         canvas?.drawCircle(centerX.toFloat(), centerY.toFloat(), circleRadius, paint)
