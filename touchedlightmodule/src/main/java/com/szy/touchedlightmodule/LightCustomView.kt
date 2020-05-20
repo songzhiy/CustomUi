@@ -4,6 +4,7 @@ import android.content.Context
 import android.graphics.*
 import android.os.Build
 import android.util.AttributeSet
+import android.util.Log
 import android.view.View
 import androidx.annotation.RequiresApi
 import kotlin.math.cos
@@ -48,6 +49,11 @@ class LightCustomView : View {
         defStyleAttr,
         defStyleRes
     )
+
+    fun setRatio(ratio: Float) {
+        this.ratio = ratio
+        invalidate()
+    }
 
     override fun onDraw(canvas: Canvas?) {
         paint.reset()
