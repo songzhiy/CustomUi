@@ -46,7 +46,7 @@ class TouchedLightFrameLayout(
     private var lightViewRadius = dp2px(getContext(), 50f)
 
     //todo 天气view的背景padding 相当于中间宽度 + padding = 整个宽度
-    private var lightViewBgPadding = dp2px(getContext(), 50f)
+    private var lightViewBgPadding = dp2px(getContext(), 100f)
 
     constructor(context: Context, attrs: AttributeSet) : this(context, attrs, 0, 0)
 
@@ -98,10 +98,11 @@ class TouchedLightFrameLayout(
             lightCustomView = LightCustomView(this.context)
             val params = FrameLayout.LayoutParams(
                 lightViewBgPadding + lightViewRadius,
-                lightViewBgPadding + lightViewBgPadding
+                lightViewBgPadding + lightViewRadius
             )
             params.gravity = Gravity.CENTER
             this.addView(lightCustomView, params)
+            lightCustomView!!.setCircleRadius(this.lightViewRadius.toFloat())
             lightCustomView!!.setBackgroundColor(
                 ContextCompat.getColor(
                     context,

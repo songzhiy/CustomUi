@@ -21,7 +21,7 @@ class LightCustomView : View {
 
     //这个ratio正常情况下应该取当前亮度的值比例进行初始化
     private var ratio = 1f//当前的比例
-    private val circleRadius = 100.0f
+    private var circleRadius = 100.0f
 
     private val paint = Paint()
 
@@ -56,6 +56,13 @@ class LightCustomView : View {
      */
     fun setRatio(ratio: Float) {
         this.ratio = ratio
+    }
+
+    /**
+     * 设置当前亮度view的太阳半径
+     */
+    fun setCircleRadius(circleRadius: Float) {
+        this.circleRadius = circleRadius
     }
 
     /**
