@@ -120,7 +120,9 @@ class LightCustomView : View {
         thisViewRectangle: Rect
     ) {
         val path = Path()
+        paint.reset()
         paint.color = Color.WHITE
+        paint.style = Paint.Style.STROKE
         paint.strokeWidth = 5f
         val count = getLightHaloDrawCount()
         for (i in 0..count) {
@@ -134,16 +136,9 @@ class LightCustomView : View {
             val haloStartPointX = thisViewRectangle.centerX().toFloat()
             val haloStartPointY =
                 thisViewRectangle.centerY().toFloat() - circleRadius - lightHaloDistance
-//            path.moveTo(haloStartPointX, haloStartPointY)
-//            path.lineTo(haloStartPointX, haloStartPointY - lightHaloLength)
-//            canvas?.drawPath(path, paint)
-            canvas?.drawLine(
-                haloStartPointX,
-                haloStartPointY,
-                haloStartPointX,
-                haloStartPointY - lightHaloLength,
-                paint
-            )
+            path.moveTo(haloStartPointX, haloStartPointY)
+            path.lineTo(haloStartPointX, haloStartPointY - lightHaloLength)
+            canvas?.drawPath(path, paint)
             canvas?.restore()
         }
     }
