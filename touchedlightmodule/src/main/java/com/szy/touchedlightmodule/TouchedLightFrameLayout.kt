@@ -10,7 +10,6 @@ import android.view.View
 import android.widget.FrameLayout
 import androidx.annotation.RequiresApi
 import androidx.core.content.ContextCompat
-import kotlin.math.abs
 
 fun dp2px(context: Context?, dp: Float): Int {
     var scale = 0f
@@ -40,8 +39,8 @@ class TouchedLightFrameLayout(
 
     var xLimitDistance = 50//手指横向移动的最大距离 该距离内视为有效
     val smoothMaxDistance = 500 //手指滑动的最大距离
-    var firstTouchDownY = -1f
-    var firstTouchDownX = -1f
+    var lastTouchDownY = -1f
+    var lastTouchDownX = -1f
 
     //todo 天气view的直径 通过framelayout 自定义属性设置 处理给自定义view
     private var lightViewRadius = dp2px(getContext(), 50f)
@@ -63,8 +62,8 @@ class TouchedLightFrameLayout(
     override fun onTouchEvent(event: MotionEvent?): Boolean {
         when (event?.action) {
             MotionEvent.ACTION_DOWN -> {
-                firstTouchDownX = event.x
-                firstTouchDownY = event.y
+                lastTouchDownX = event.x
+                lastTouchDownY = event.y
             }
             MotionEvent.ACTION_MOVE -> {
 //                if (abs(firstTouchDownX - event.x) > xLimitDistance) {
@@ -75,21 +74,18 @@ class TouchedLightFrameLayout(
                 checkAndInitView()
                 lightCustomView!!.visibility = View.VISIBLE
                 //对自定义亮度view进行设置
-                //todo 这里需要重新细化下相关逻辑 亮度上升 or 下降
-                if (abs(event.y - firstTouchDownY) >= smoothMaxDistance) {
-                    lightCustomView!!.setRatio(1f)
-                } else {
-                    lightCustomView!!.setRatio((Math.abs(event.y - firstTouchDownY)) / smoothMaxDistance)
-                }
+                lightCustomView!!.updateRatio((event.y - lastTouchDownY) / smoothMaxDistance)
+                lastTouchDownX = event.x
+                lastTouchDownY = event.y
             }
             MotionEvent.ACTION_UP -> {
-                firstTouchDownY = -1f
-                firstTouchDownX = -1f
+                lastTouchDownY = -1f
+                lastTouchDownX = -1f
                 lightCustomView!!.visibility = View.GONE
             }
             MotionEvent.ACTION_CANCEL -> {
-                firstTouchDownX = -1f
-                firstTouchDownY = -1f
+                lastTouchDownX = -1f
+                lastTouchDownY = -1f
                 lightCustomView?.visibility = View.GONE
             }
         }

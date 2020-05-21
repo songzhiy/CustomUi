@@ -19,6 +19,7 @@ fun getTwoPointDistance(pointA: LightCustomView.Point, pointB: LightCustomView.P
  */
 class LightCustomView : View {
 
+    //这个ratio正常情况下应该取当前亮度的值比例进行初始化
     private var ratio = 1f//当前的比例
     private val circleRadius = 100.0f
 
@@ -50,8 +51,24 @@ class LightCustomView : View {
         defStyleRes
     )
 
+    /**
+     * 用来直接设置当前的ratio值，主要用来初始化操作
+     */
     fun setRatio(ratio: Float) {
         this.ratio = ratio
+    }
+
+    /**
+     * 用来更新ratio的值
+     * @param ratio 本次比例变化的情况 可以是正数，也可以是负数
+     */
+    fun updateRatio(ratio: Float) {
+        this.ratio += ratio
+        if (this.ratio >= 1f) {
+            this.ratio = 1f
+        } else if (this.ratio <= 0f) {
+            this.ratio = 0f
+        }
         invalidate()
     }
 
