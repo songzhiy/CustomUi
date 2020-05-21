@@ -4,7 +4,6 @@ import android.content.Context
 import android.graphics.*
 import android.os.Build
 import android.util.AttributeSet
-import android.util.Log
 import android.view.View
 import androidx.annotation.RequiresApi
 import kotlin.math.cos
@@ -22,6 +21,9 @@ class LightCustomView : View {
     //这个ratio正常情况下应该取当前亮度的值比例进行初始化
     private var ratio = 1f//当前的比例
     private var circleRadius = 100.0f
+
+    private val lightHaloDistance = 10f
+    private val lightHaloLength = 30f
 
     private val paint = Paint()
 
@@ -59,10 +61,10 @@ class LightCustomView : View {
     }
 
     /**
-     * 设置当前亮度view的太阳半径
+     * 设置当前亮度view的太阳半径（包含40px的光晕）
      */
     fun setCircleRadius(circleRadius: Float) {
-        this.circleRadius = circleRadius
+        this.circleRadius = circleRadius - 40f
     }
 
     /**
@@ -108,6 +110,50 @@ class LightCustomView : View {
         drawInnerArc(pairPoint, 0.43f, canvas, paint, thisViewRectangle)
         paint.setXfermode(null)
         canvas?.restoreToCount(count!!)
+        //开始绘制太阳亮度的光晕
+        drawLightHalo(paint, canvas, thisViewRectangle)
+    }
+
+    private fun drawLightHalo(
+        paint: Paint,
+        canvas: Canvas?,
+        thisViewRectangle: Rect
+    ) {
+        val path = Path()
+        paint.color = Color.WHITE
+        paint.strokeWidth = 5f
+        val count = getLightHaloDrawCount()
+        for (i in 0..count) {
+            path.reset()
+            canvas?.save()
+            canvas?.rotate(
+                (20 * i).toFloat(),
+                thisViewRectangle.centerX().toFloat(),
+                thisViewRectangle.centerY().toFloat()
+            )
+            val haloStartPointX = thisViewRectangle.centerX().toFloat()
+            val haloStartPointY =
+                thisViewRectangle.centerY().toFloat() - circleRadius - lightHaloDistance
+//            path.moveTo(haloStartPointX, haloStartPointY)
+//            path.lineTo(haloStartPointX, haloStartPointY - lightHaloLength)
+//            canvas?.drawPath(path, paint)
+            canvas?.drawLine(
+                haloStartPointX,
+                haloStartPointY,
+                haloStartPointX,
+                haloStartPointY - lightHaloLength,
+                paint
+            )
+            canvas?.restore()
+        }
+    }
+
+    //计算要绘制的光晕个数 将360分成18分 每分20度
+    // 当前比例 * 360 / 20 得到当前应绘制的光晕个数
+    private fun getLightHaloDrawCount(): Int {
+        val currentAngle = this.ratio * 360
+        val count = currentAngle / 20
+        return 18 - count.toInt()
     }
 
     private fun drawInnerArc(
