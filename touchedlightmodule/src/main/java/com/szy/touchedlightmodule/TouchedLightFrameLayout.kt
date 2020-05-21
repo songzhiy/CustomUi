@@ -38,7 +38,7 @@ class TouchedLightFrameLayout(
 
     var lightCustomView: LightCustomView? = null
 
-    val smoothMinDistance = 10//手指滑动触发亮度调节的最小距离
+    var xLimitDistance = 50//手指横向移动的最大距离 该距离内视为有效
     val smoothMaxDistance = 500 //手指滑动的最大距离
     var firstTouchDownY = -1f
     var firstTouchDownX = -1f
@@ -67,14 +67,10 @@ class TouchedLightFrameLayout(
                 firstTouchDownY = event.y
             }
             MotionEvent.ACTION_MOVE -> {
-//                if (abs(firstTouchDownX - event.x) > smoothMinDistance) {
+//                if (abs(firstTouchDownX - event.x) > xLimitDistance) {
 //                    //当x的触发距离大于最小触发限定值时，认为无效
 //                    return super.onTouchEvent(event)
 //                }
-                if (abs(firstTouchDownY - event.y) < smoothMinDistance) {
-                    //当y的触发距离小于最小触发限定值时，认为无效
-                    return super.onTouchEvent(event)
-                }
                 //构建自定义亮度view
                 checkAndInitView()
                 lightCustomView!!.visibility = View.VISIBLE
