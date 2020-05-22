@@ -15,6 +15,9 @@ fun getTwoPointDistance(pointA: LightCustomView.Point, pointB: LightCustomView.P
 /**
  * Created by songzhiyang on 2020-05-15.
  * @author songzhiyang
+ *
+ * 参考：https://www.jianshu.com/p/55e7de12451d
+ *
  */
 class LightCustomView : View {
 
