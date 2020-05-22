@@ -245,12 +245,18 @@ class LightCustomView : View {
         var cosa = 1 / (Math.sqrt(1 + Math.pow(koc, 2.0)))
         //这里处理的原因是：
         //当角度a大于90度时，x坐标实际上应为 pointOx - cos(Pi - a) * k * ab = pointOx + cosa * k * ab
-        if (koc > 0) cosa = cosa else cosa = -cosa
+        //这里pointB.y < pointA.y的check条件是 因为起步阶段，koc可能为负值，但角度不应为180-a，应该就是a
+        //todo 这里的条件check过于简陋 当月亮的角度修改时，应该会引发条件check的问题
+        //todo 说白了 就是条件check不闭环 后面有空再扩展吧 -。-
+        if (koc > 0 || pointB.y < pointA.y) {
+            cosa = cosa
+        } else {
+            cosa = -cosa
+        }
         val sina = koc * cosa
         //根据o点坐标 计算c点坐标
         val pointCx = pointOx - k * getTwoPointDistance(pointA, pointB) * cosa
         val pointCy = pointOy + k * getTwoPointDistance(pointA, pointB) * sina
-
         return Point(pointCx, pointCy)
     }
 
